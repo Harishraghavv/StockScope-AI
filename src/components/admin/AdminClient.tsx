@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { Users, Server, Database, Activity, ShieldAlert, CheckCircle2 } from "lucide-react"
-import type { User } from "@prisma/client"
+import type { CurrentUser } from "@/lib/auth/current-user"
 
-export default function AdminClient({ user }: { user: Omit<User, "passwordHash"> }) {
+export default function AdminClient({ user }: { user: CurrentUser }) {
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "system">("overview")
 
   const metrics = [

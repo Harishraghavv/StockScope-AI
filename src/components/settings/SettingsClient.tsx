@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { Bell, Shield, Monitor, Moon, Sun } from "lucide-react"
-import type { User } from "@prisma/client"
+import type { CurrentUser } from "@/lib/auth/current-user"
 
-export default function SettingsClient({ user }: { user: Omit<User, "passwordHash"> }) {
+export default function SettingsClient({ user }: { user: CurrentUser }) {
   const [theme, setTheme] = useState<"dark" | "light" | "system">("dark")
   const [notifications, setNotifications] = useState({
     priceAlerts: true,

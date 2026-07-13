@@ -1,9 +1,9 @@
 "use client"
 
 import { User } from "lucide-react"
-import type { User as PrismaUser } from "@prisma/client"
+import type { CurrentUser } from "@/lib/auth/current-user"
 
-export default function ProfileClient({ user }: { user: Omit<PrismaUser, "passwordHash"> }) {
+export default function ProfileClient({ user }: { user: CurrentUser }) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
