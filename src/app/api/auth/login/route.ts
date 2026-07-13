@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const invalidCredentials = () => apiError("Invalid email or password.", 401);
 
     // Try Prisma first, fallback to memory store
-    let user: { id: string; name: string; email: string; role: string; passwordHash: string } | null = null;
+    let user: { id: string; name: string; email: string; role: "USER" | "ADMIN"; passwordHash: string } | null = null;
 
     try {
       const { prisma } = await import("@/lib/prisma");
