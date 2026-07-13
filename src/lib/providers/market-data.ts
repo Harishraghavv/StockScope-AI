@@ -123,8 +123,32 @@ export async function getTrendingStocks(limit = 6): Promise<StockQuote[]> {
 }
 
 export async function getIndices(): Promise<MarketIndex[]> {
-  // Indices stay mock — Yahoo Finance free tier doesn't reliably
-  // serve NSE/BSE index data (NIFTY, SENSEX).
+  try {
+    const liveIndices = await fetchLiveQuotes(["^NSEI", "^BSESN", "^NSEBANK", "^CNXIT"]);
+    if (liveIndices.size > 0) {
+      return MOCK_INDICES.map((mock) => {
+        let symbol = "";
+        if (mock.name === "NIFTY 50") symbol = "^NSEI";
+        else if (mock.name === "SENSEX") symbol = "^BSESN";
+        else if (mock.name === "NIFTY BANK") symbol = "^NSEBANK";
+        else if (mock.name === "NIFTY IT") symbol = "^CNXIT";
+
+        const live = liveIndices.get(symbol);
+        if (!live) return mock;
+
+        return {
+          ...mock,
+          value: live.price,
+          change: live.change,
+          changePercent: live.changePercent,
+        };
+      });
+    }
+  } catch (err) {
+    console.warn("[Market Data] Yahoo Finance indices unavailable:", err);
+  }
+
+  // Fallback to mock
   return MOCK_INDICES;
 }
 

@@ -67,7 +67,8 @@ export async function fetchLiveQuote(symbol: string): Promise<YahooQuote | null>
   if (cached) return cached;
 
   try {
-    const url = `${YAHOO_CHART_URL}/${symbol}.NS?interval=1d&range=1d`;
+    const querySymbol = symbol.startsWith("^") ? symbol : `${symbol}.NS`;
+    const url = `${YAHOO_CHART_URL}/${querySymbol}?interval=1d&range=1d`;
     const res = await fetch(url, { headers: HEADERS, next: { revalidate: 300 } });
 
     if (!res.ok) return null;
@@ -129,7 +130,8 @@ export async function fetchCompanyDetails(symbol: string): Promise<YahooCompanyD
 
   try {
     const modules = "price,summaryDetail,financialData,defaultKeyStatistics,assetProfile";
-    const url = `${YAHOO_QUOTE_URL}/${symbol}.NS?modules=${modules}`;
+    const querySymbol = symbol.startsWith("^") ? symbol : `${symbol}.NS`;
+    const url = `${YAHOO_QUOTE_URL}/${querySymbol}?modules=${modules}`;
     const res = await fetch(url, { headers: HEADERS, next: { revalidate: 900 } });
 
     if (!res.ok) return null;
@@ -185,7 +187,8 @@ export async function fetchPriceHistory(
 
   try {
     const interval = range === "1d" ? "5m" : range === "5d" ? "15m" : "1d";
-    const url = `${YAHOO_CHART_URL}/${symbol}.NS?interval=${interval}&range=${range}`;
+    const querySymbol = symbol.startsWith("^") ? symbol : `${symbol}.NS`;
+    const url = `${YAHOO_CHART_URL}/${querySymbol}?interval=${interval}&range=${range}`;
     const res = await fetch(url, { headers: HEADERS, next: { revalidate: 1800 } });
 
     if (!res.ok) return null;
