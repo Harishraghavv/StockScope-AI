@@ -1,0 +1,119 @@
+// StockScope AI — Database Schema
+// Modules: Authentication, Stock Screener (saved screeners)
+// Market/company data (Dashboard, Screener universe) is currently served
+// from in-memory mock data (see src/lib/mock-data, src/lib/providers) —
+// it is intentionally NOT modeled here yet. A later "live data" pass will
+// introduce Company/Sector/Watchlist/etc. tables once a real market data
+// provider is wired in, so schema and running app stay in sync.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  passwordHash      String
+  role              Role     @default(USER)
+
+  emailVerified     Boolean  @default(false)
+  emailVerifyToken  String?  @unique
+
+  resetToken        String?  @unique
+  resetTokenExpiry  DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sessions          Session[]
+  auditLogs         AuditLog[]
+  savedScreeners    SavedScreener[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// Tracks issued refresh sessions so users can be logged out / revoked server-side.
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// Minimal audit trail — expanded in later modules (login attempts, admin actions, etc.)
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  metadata  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// Module: Stock Screener
+// Stores a user's saved filter presets. The filters themselves are
+// stored as JSON matching the ScreenerFilters shape in
+// src/lib/market-types.ts — the screener universe/results stay in
+// mock data for now, only the *saved filter preset* is persisted.
+// ============================================================
+
+model SavedScreener {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  filters   Json
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("saved_screeners")
+}
+
+// ============================================================
+// Module: Live Market Data (Twelve Data)
+// Stores the most recently fetched quote for each symbol, refreshed on
+// an interval (not per-request) to stay within free-tier API rate limits.
+// All dashboard/screener/company reads hit this table, never the live
+// API directly — the background refresh job is the only caller of
+// Twelve Data. If TWELVE_DATA_API_KEY is unset, the app falls back to
+// mock data automatically (see src/lib/providers/market-data.ts).
+// ============================================================
+
+model LiveQuote {
+  symbol       String   @id
+  name         String
+  exchange     String   @default("NSE")
+  price        Float
+  change       Float
+  changePercent Float
+  volume       BigInt   @default(0)
+  fetchedAt    DateTime @default(now())
+  stale        Boolean  @default(false) // set true if the last refresh attempt failed
+
+  @@index([fetchedAt])
+  @@map("live_quotes")
+}
