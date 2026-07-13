@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/live-data/refresh?secret=REPLACE_WITH_YOUR_CRON_SECRET",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
