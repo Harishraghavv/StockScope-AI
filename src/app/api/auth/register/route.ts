@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const { name, email, password } = registerSchema.parse(body);
 
     // Try Prisma first, fallback to memory store
-    let user: { id: string; name: string; email: string; role: string };
+    let user: { id: string; name: string; email: string; role: "USER" | "ADMIN" };
 
     try {
       const { prisma } = await import("@/lib/prisma");
