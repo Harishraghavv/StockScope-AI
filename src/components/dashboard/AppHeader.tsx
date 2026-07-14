@@ -22,7 +22,7 @@ export default function AppHeader({ user }: { user: CurrentUser }) {
               S
             </span>
             <span className="font-display text-[15px] font-medium text-ink dark:text-paper">
-              StockScope AI
+              StockScope AI ✨
             </span>
           </Link>
           <nav className="hidden items-center gap-1 md:flex">

@@ -23,7 +23,7 @@ export default async function CompanyPage({ params }: Props) {
   // Fetch competitor data for peer comparison
   const competitorData = await Promise.all(
     data.competitors.map((sym) => getCompanyFullData(sym))
-  ).then((results) => results.filter(Boolean) as Awaited<ReturnType<typeof getCompanyFullData>>[]);
+  ).then((results) => results.filter(Boolean) as any[]);
 
   const isUp = data.changePercent >= 0;
 
