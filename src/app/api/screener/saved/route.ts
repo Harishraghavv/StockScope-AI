@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     try {
       const { prisma } = await import("@/lib/prisma");
       const saved = await prisma.savedScreener.create({
-        data: { userId: user.id, name, filters },
+        data: { userId: user.id, name, filters: filters as any },
       });
       return apiSuccess({ saved }, 201);
     } catch {
