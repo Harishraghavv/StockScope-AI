@@ -41,20 +41,16 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       // Prisma unavailable — fall through to memory store
     }
 
-    // Fallback: in-memory user store
-    const memUser = await findUserById(payload.sub);
-    if (memUser) {
-      return {
-        id: memUser.id,
-        name: memUser.name,
-        email: memUser.email,
-        role: memUser.role,
-        emailVerified: memUser.emailVerified,
-        createdAt: memUser.createdAt,
-      };
-    }
-
-    return null;
+    // Fallback: Vercel serverless environments lose memory state between requests.
+    // Since the JWT is cryptographically verified, we can trust its payload directly.
+    return {
+      id: payload.sub,
+      name: payload.email.split("@")[0], // Fallback name
+      email: payload.email,
+      role: payload.role || "USER",
+      emailVerified: true,
+      createdAt: new Date(),
+    };
   } catch {
     // Expired, malformed, or tampered token — treat as logged out.
     return null;
